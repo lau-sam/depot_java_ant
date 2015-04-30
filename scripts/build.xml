@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<project basedir="." default="startProject" name="MyFirstProject">
+	<property name="src" location="projects"/>
+	<property name="jarName" location="MonApplicationCompiled.jar"/>
+	<property name="classes" location="../libs/csvlib.jar"/>
+
+
+	<target name="cleanFolders">
+		<echo message="Suppression du dossier classFolder, s'il existe."/>
+		<delete dir="../classFolder"/>
+	</target>
+
+	<target name="createFolders" depends="cleanFolders">
+		<echo message="Creation du dossier classFolder."/>
+		<mkdir dir="../classFolder"/>
+	</target>
+
+	<target name="cpLibs" depends="createFolders">
+		<echo message="Copier le fichier lib"/>
+		<copy file="../libs/csvlib.jar" todir="../classFolder"/>
+	</target>
+
+	<target name="compileProject" depends="cpLibs">
+		<echo message="Compilation des fichiers java en class."/>
+		<javac srcdir="../projects/bdd/src" destdir="../classFolder" classpath="${classes}"/>
+		<javac srcdir="../projects/services/src" destdir="../classFolder" classpath="${classes}"/>
+		<javac srcdir="../projects/gui/src" destdir="../classFolder" classpath="${classes}"/>
+	</target>
+
+	<target name="createJar" depends="compileProject">
+		<echo message="Nettoyage et Creation du dossier jar et copier dans Classes"/>
+		<delete dir="../jarFolder"/>
+		<mkdir dir="../jarFolder"/>	
+        <jar destfile="../jarFolder/MyFirstProject.jar" basedir="../classFolder" manifest="../projects/gui/src/MANIFEST.MF"/>
+        <copy file="../jarFolder/MyFirstProject.jar" todir="../classFolder"/>
+	</target>
+
+	<target name="zipper" depends="createJar">
+		<echo message="Archiver le programme"/>
+		<zip destfile="../monAppli.zip" basedir="../classFolder" update="true"/>
+	</target>
+
+	<target name="startProject" depends="zipper">
+		<echo message="Lancement du jar"/>	
+		<java jar="../classFolder/MyFirstProject.jar" fork="true"/>
+	</target>
+</project>

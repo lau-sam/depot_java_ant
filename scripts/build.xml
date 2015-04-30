@@ -1,47 +1,79 @@
 <?xml version="1.0" ?>
-<project basedir="." default="startProject" name="MyFirstProject">
-	<property name="src" location="projects"/>
-	<property name="jarName" location="MonApplicationCompiled.jar"/>
-	<property name="classes" location="../libs/csvlib.jar"/>
+<project basedir="..\" default="DefaultTarget" name="MyFirstProject">
+	<property name="srcBdd" location="projects/bdd/src"/>
+	<property name="srcServices" location="projects/services/src"/>
+	<property name="srcGui" location="projects/gui/src"/>
+	<property name="jarName" location="MyApplication.jar"/>
+	<property name="jarBdd" value="bdd.jar"/>
+	<property name="jarServices" value="services.jar"/>
+	<property name="jarGui" value="gui.jar"/>
+	<property name="build" location="build"/>
+	<property name="classes" location="${build}/classes"/>
+	<property name="classesBdd" location="${classes}/tpjava/bdd"/>
+	<property name="classesServices" location="${classes}/tpjava/services"/>
+	<property name="classesGui" location="${classes}/tpjava/gui"/>
+	<property name="jars" location="${build}/jars"/>
+	<property name="libs" location="libs"/>
+	<property name="app" location="${jars}/tpjava"/>
+	<property name="csvlib" location="${libs}/csvlib.jar"/>
+	<property name="manifest" location="${srcGui}/MANIFEST.MF"/>
 
-
-	<target name="cleanFolders">
-		<echo message="Suppression du dossier classFolder, s'il existe."/>
-		<delete dir="../classFolder"/>
+	<target name="clean">
+		<echo message="clean"/>
+		<delete dir="${build}"/>
 	</target>
 
-	<target name="createFolders" depends="cleanFolders">
-		<echo message="Creation du dossier classFolder."/>
-		<mkdir dir="../classFolder"/>
+	<target name="createFolders" depends="clean">
+		<echo message="createFolders"/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${classes}"/>
+		<mkdir dir="${jars}"/>
+		<mkdir dir="${app}"/>
 	</target>
 
-	<target name="cpLibs" depends="createFolders">
-		<echo message="Copier le fichier lib"/>
-		<copy file="../libs/csvlib.jar" todir="../classFolder"/>
+	<target name="compileBdd" depends="createFolders">
+		<echo message="compileBdd"/>
+		<javac srcdir="${srcBdd}" destdir="${classes}" includeantruntime="false" classpath="${libs}/csvlib.jar" compiler="modern"/>
+	</target>
+	
+	<target name="jarBdd" depends="compileBdd">
+		<jar destfile="${app}/${jarBdd}" basedir="${classes}" includes="**\bdd\**"/>
+	</target>
+	
+	<target name="compileServices" depends="jarBdd">
+		<echo message="compileServices"/>
+		<javac srcdir="${srcServices}" destdir="${classes}" includeantruntime="false" compiler="modern"/>
+	</target>
+	
+	<target name="jarServices" depends="compileServices">
+		<jar destfile="${app}/${jarServices}" basedir="${classes}" includes="**\services\**"/>
+	</target>
+	
+	<target name="compileGui" depends="jarServices">
+		<echo message="compileGui"/>
+		<javac srcdir="${srcGui}" destdir="${classes}" includeantruntime="false" compiler="modern"/>
 	</target>
 
-	<target name="compileProject" depends="cpLibs">
-		<echo message="Compilation des fichiers java en class."/>
-		<javac srcdir="../projects/bdd/src" destdir="../classFolder" classpath="${classes}"/>
-		<javac srcdir="../projects/services/src" destdir="../classFolder" classpath="${classes}"/>
-		<javac srcdir="../projects/gui/src" destdir="../classFolder" classpath="${classes}"/>
+	<target name="jarGui" depends="compileGui">
+		<echo message="jarGui"/>
+		<manifest file="${manifest}" mode="update">
+			<attribute name="Class-Path" value="bdd.jar services.jar csvlib.jar"/>
+		</manifest>
+		<jar destfile="${app}/${jarGui}" manifest="${manifest}" basedir="${classes}" includes="**\gui\**"/>
 	</target>
 
-	<target name="createJar" depends="compileProject">
-		<echo message="Nettoyage et Creation du dossier jar et copier dans Classes"/>
-		<delete dir="../jarFolder"/>
-		<mkdir dir="../jarFolder"/>	
-        <jar destfile="../jarFolder/MyFirstProject.jar" basedir="../classFolder" manifest="../projects/gui/src/MANIFEST.MF"/>
-        <copy file="../jarFolder/MyFirstProject.jar" todir="../classFolder"/>
+	<target name="libCopy" depends="jarGui">
+		<echo message="libCopy"/>
+		<copy todir="${app}" force="true" file="${csvlib}"/>
 	</target>
 
-	<target name="zipper" depends="createJar">
-		<echo message="Archiver le programme"/>
-		<zip destfile="../monAppli.zip" basedir="../classFolder" update="true"/>
+	<target name="zip" depends="libCopy">
+		<echo message="zip"/>
+		<zip destfile="${build}\Virus.zip" basedir="${jars}"/>
 	</target>
 
-	<target name="startProject" depends="zipper">
-		<echo message="Lancement du jar"/>	
-		<java jar="../classFolder/MyFirstProject.jar" fork="true"/>
+	<target name="DefaultTarget" depends="zip">
+		<echo message="letsGo"/>
 	</target>
+
 </project>

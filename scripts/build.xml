@@ -69,11 +69,11 @@
 
 	<target name="zip" depends="libCopy">
 		<echo message="zip"/>
-		<zip destfile="${build}\Virus.zip" basedir="${jars}"/>
+		<zip destfile="${build}\livrable.zip" basedir="${jars}"/>
 	</target>
 
 	<target name="DefaultTarget" depends="zip">
-		<echo message="letsGo"/>
+		<echo message="End of operations"/>
 	</target>
 
 </project>
